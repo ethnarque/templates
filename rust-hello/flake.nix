@@ -19,54 +19,47 @@
         fn:
         nixpkgs.lib.genAttrs systems (
           system:
-          fn {
-            pkgs = nixpkgs.legacyPackages.${system};
-            inherit system;
-          }
+          fn (
+            import nixpkgs {
+              inherit system;
+            }
+          )
         );
     in
     {
-      packages = forAllSystems (
-        { pkgs, ... }:
-        {
-          default = pkgs.rustPlatform.buildRustPackage {
-            pname = "rust_hello";
-            version = "0.1.0";
-            src = ./.;
-            cargoLock = {
-              lockFile = ./Cargo.lock;
-              outputHashes = { };
-            };
+      packages = forAllSystems (pkgs: {
+        default = pkgs.rustPlatform.buildRustPackage {
+          pname = "rust_hello";
+          version = "0.1.0";
+          src = ./.;
+          cargoLock = {
+            lockFile = ./Cargo.lock;
+            outputHashes = { };
           };
-        }
-      );
+        };
+      });
 
-      apps = forAllSystems (
-        { system, ... }:
-        {
-          default = {
-            type = "app";
-            program = "${self.packages.${system}.default}/bin/rust_hello";
-          };
-        }
-      );
+      apps = forAllSystems (pkgs: {
+        default = {
+          type = "app";
+          program = "${self.packages.${pkgs.system}.default}/bin/rust_hello";
+        };
+      });
 
-      devShells = forAllSystems (
-        { pkgs, ... }:
-        {
-          default = pkgs.mkShell {
-            nativeBuildInputs = with pkgs; [
-              cargo
-              rustc
-            ];
-            packages = with pkgs; [
-              nil
-              rust-analyzer
-            ];
-          };
-        }
-      );
+      devShells = forAllSystems (pkgs: {
+        default = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [
+            cargo
+            rustc
+          ];
+          packages = with pkgs; [
+            nil
+            nixfmt-rfc-style
+            rust-analyzer
+          ];
+        };
+      });
 
-      formatter = forAllSystems ({ pkgs, ... }: pkgs.nixfmt-rfc-style);
+      formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
     };
 }

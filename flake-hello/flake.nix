@@ -20,40 +20,37 @@
         fn:
         nixpkgs.lib.genAttrs systems (
           system:
-          fn {
-            pkgs = nixpkgs.legacyPackages.${system};
-            inherit system;
-          }
+          fn (
+            import nixpkgs {
+              inherit system;
+            }
+          )
         );
     in
     {
-      packages = forAllSystems (
-        { pkgs, ... }:
-        {
-          default = pkgs.writeScriptBin "flake-hello" ''
-            #!${pkgs.bash}/bin/bash
-            nix flake info
-          '';
-        }
-      );
+      packages = forAllSystems (pkgs: {
+        default = pkgs.writeScriptBin "flake-hello" ''
+          #!${pkgs.bash}/bin/bash
+          nix flake info
+        '';
+      });
 
-      apps = forAllSystems (
-        { system, ... }:
-        {
-          default = {
-            type = "app";
-            program = "${self.packages.${system}.default}/bin/flake-hello";
-          };
-        }
-      );
+      apps = forAllSystems (pkgs: {
+        default = {
+          type = "app";
+          program = "${self.packages.${pkgs.system}.default}/bin/flake-hello";
+        };
+      });
 
-      devShells = forAllSystems (
-        { pkgs, ... }:
-        {
-          default = pkgs.mkShell { packages = with pkgs; [ nil ]; };
-        }
-      );
+      devShells = forAllSystems (pkgs: {
+        default = pkgs.mkShell {
+          packages = with pkgs; [
+            nil
+            nixfmt-rfc-style
+          ];
+        };
+      });
 
-      formatter = forAllSystems ({ pkgs, ... }: pkgs.nixfmt-rfc-style);
+      formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
     };
 }

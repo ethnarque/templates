@@ -1,5 +1,5 @@
 {
-  description = "ethnarque's flake templates";
+  description = "monologiques' flake templates";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-24.11";
@@ -21,21 +21,13 @@
         (nixpkgs.lib.genAttrs systems (
           system:
           fn (
-            let
-              pkgs = import nixpkgs {
-                inherit system;
-                overlays = [ ];
-              };
-            in
-            {
-              inherit pkgs system;
+            import nixpkgs {
+              inherit system;
             }
           )
         ));
     in
     {
-      formatter = forAllSystems ({ pkgs, ... }: pkgs.nixfmt-rfc-style);
-
       templates = {
         c-hello = {
           path = ./c-hello;
@@ -53,11 +45,15 @@
         };
       };
 
-      devShells = forAllSystems (
-        { pkgs, ... }:
-        {
-          default = pkgs.mkShell { packages = with pkgs; [ nil ]; };
-        }
-      );
+      devShells = forAllSystems (pkgs: {
+        default = pkgs.mkShell {
+          packages = with pkgs; [
+            nil
+            nixfmt-rfc-style
+          ];
+        };
+      });
+
+      formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
     };
 }

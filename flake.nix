@@ -43,6 +43,11 @@
           path = ./rust-hello;
           description = "Simple Hello world in Rust";
         };
+
+        typst-hello = {
+          path = ./typst-hello;
+          description = "Simple Hello world in Typst";
+        };
       };
 
       devShells = forAllSystems (pkgs: {

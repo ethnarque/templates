@@ -1,5 +1,5 @@
 {
-  description = "monologiques' flake templates";
+  description = "monologique's flake templates";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-24.11";
@@ -37,6 +37,11 @@
         flake-hello = {
           path = ./flake-hello;
           description = "Simple flake boilter plate";
+        };
+
+        python-hello = {
+          path = ./python-hello;
+          description = "Simple Hello world in Python";
         };
 
         rust-hello = {
